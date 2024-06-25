@@ -9,25 +9,49 @@ function buildMetadata(sample) {
         
     // get the metadata field 
     let meta_field = meta.metadata
-    console.log(meta_field)
-    // Filter the metadata for the object with the desired sample number
     
+    // Filter the metadata for the object with the desired sample number
+
+    meta_field=meta_field.filter(sampleid=> sampleid.id==sample)
+
     // Use d3 to select the panel with id of `#sample-metadata`
     let meta_samp = d3.select('#sample_metadata')
     // Use `.html("") to clear any existing metadata
-    
+    // meta_field.html("")
 
+    let T_able = d3.select('ul')
+    let body = T_able.select('li')
 
     // Inside a loop, you will need to use d3 to append new
     // tags for each key-value in the filtered metadata.
+  
+    meta_field.map(table => {
+      let row = body.append('ul')
+      Object.values(table).forEach(tableBody => {
+        row.append('li').text(tableBody)
+      })
+    })
 
-     // Use d3 to select the dropdown with id of `#selDataset`
-     let dropdown = d3.select('#selDataset')
-     let name1 = meta.names
-     name1.map(name_id => { 
-       dropdown.append('option').text(name_id).property('names')
-     })
+      
+  });
+}
 
+    
+
+ 
+function getnames(sample) {
+  d3.json(url).then((drop) =>{
+
+
+  // Use d3 to select the dropdown with id of `#selDataset`
+    let dropdown = d3.selectAll('#selDataset').on("change",optionChanged);
+    let selectedData = dropdown.property('values')
+    
+
+    let name1 = drop.names
+    name1.map(name_id => { 
+      dropdown.append('option').text(name_id).property('names')
+    })
   });
 }
 
@@ -38,10 +62,13 @@ function buildCharts(sample) {
     
     // For the Bar Chart, map the otu_ids to a list of strings for your yticks
     // Don't forget to slice and reverse the input data appropriately
+    let TableField = data.samples
+    
+    table_field=TableField.filter(sampleid=> sampleid.id==sample)
 
-    let sv1 = data.samples[0].sample_values.slice(0,10).reverse()
-    let otu = data.samples[0].otu_ids.slice(0,10).reverse()
-    // let otu_label = data.samples[0].otu_labels
+    let sv1 = table_field.sample_values[0].slice(0,10).reverse()
+    let otu = table_field.otu_ids[0].slice(0,10).reverse()
+    
     let id = otu.map((x) => "OTU"+ x + " " )
     
     let bar_layout = {title: "Top 10 Bacteria Cultures Found"}
@@ -58,9 +85,7 @@ function buildCharts(sample) {
     // Render the Bar Chart
     Plotly.newPlot('bar', bar, bar_layout);
     
-    // Get the samples field
-    // let sv2 = data.samples[150].sample_values
-    // let otu2 = data.sample[150].otu_ids
+    
    
     
 
@@ -107,20 +132,13 @@ function buildCharts(sample) {
 // Function to run on page load
 function init() {
   buildCharts(),
-  buildMetadata()
-
-    // Get the names field
+  buildMetadata(),
+  getnames()
   
+
+    // Get the names field 
+    
    
-    
-    
-    
-    
-    // Use the list of sample names to populate the select options
-    // Hint: Inside a loop, you will need to use d3 to append a new
-    // option for each sample name.
-    let selectedData = dropdown.property('values')
-    
     // Get the first sample from the list
 
 
@@ -133,6 +151,10 @@ function init() {
 // Function for event listener
 function optionChanged(newSample) {
   // Build charts and metadata panel each time a new sample is selected
+  // let meta_samp = d3.select('#sample_metadata')
+  // let selectedData = meta_samp.property('values')
+  console.log(newSample)
+  buildMetadata(newSample)
 // Plotly.restyle('bubble', 'values', [newdata])
 }
 
